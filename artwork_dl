@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+import bs4
+import requests
+import json
+import subprocess
+import argparse
+import sys
+import urllib.parse
+
+def main(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("artist",type=str,action="store")
+    parser.add_argument("album",type=str,action="store")
+    results = parser.parse_args(args)
+    
+    #Base URLS
+    brainz = "http://musicbrainz.org/ws/2/release"
+    cover_art = "http://coverartarchive.org/release/"
+    look_artist = results.artist.replace("/","")
+    look_album = results.album.replace("/","")
+    #Request for inital album lists with look_album
+    req = brainz + "?" + urllib.parse.urlencode({'query':look_album})
+    album_pg = requests.get(req)
+    if not album_pg.status_code == 200:
+        print("Bad status code {}".format(album_pg.status_code))
+        sys.exit(1)
+    
+    album_id = ""
+    albums = bs4.BeautifulSoup(album_pg.content,'html.parser')
+    #Loop through all releases
+    for release in albums.find_all('release'):
+        artist = release.find("name").get_text()
+        if artist.lower() == look_artist.lower():
+            album_id = release.get("id")
+            #Find out if it has album artwork
+            artwork_req = requests.get(brainz + "/" + album_id)
+            if not artwork_req.status_code == 200:
+                print("Bad status code {} for album id {}".format(
+                    artwork_req.status_code,album_id))
+            artwork_tree = bs4.BeautifulSoup(artwork_req.content,'html.parser')
+            artwork_present = artwork_tree.find("release").find(
+                    "cover-art-archive").find("artwork").get_text()
+            if artwork_present == "true":
+                print("Using Album id: {}".format(album_id))
+                break
+    #Exit if no matching album_id is found
+    if album_id == "":
+        print("Not found")
+        sys.exit(1)
+
+    coverart_req = requests.get(cover_art + album_id)
+    
+    if not coverart_req.status_code == 200:
+        print("Bad coverartarchive status code {}".format(coverart_req.status_code))
+    art = json.loads(coverart_req.content)
+    f = art["images"][0]["image"]
+    print("Downloading {} from {}".format(look_album,f))
+    command = "wget {} -O cover.jpg".format(f)
+    subprocess.Popen(command.split(" "),stdout=subprocess.PIPE,stderr=subprocess.PIPE).wait()
+    #Convert png to jpg
+    if f.endswith(".png"):
+        command = "convert cover.jpg cover.jpg"
+        print("Converting to jpg")
+        subprocess.Popen(command.split(" "),stdout=subprocess.PIPE,stderr=subprocess.PIPE).wait()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
