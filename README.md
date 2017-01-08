@@ -15,6 +15,14 @@ optional arguments:
   --quality QUALITY  Specify desired quality: original,large or small
 ```
 
+## Dependencies
+* BeautifulSoup4
+* Requests
+* Wget for downloading the image
+* ImageMagick for converting the image to a jpg if it's download as  a png, this should 
+only occur if using the "original" image quality
+
+
 ## Examples
 Download small (250px) cover art for "Bad Vibrations" by "A Day To remember" to file "cover_art.jpg" 
 
