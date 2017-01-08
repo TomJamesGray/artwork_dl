@@ -11,6 +11,7 @@ def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("artist",type=str,action="store")
     parser.add_argument("album",type=str,action="store")
+    parser.add_argument("--out",type=str,default="cover.jpg",action="store")
     results = parser.parse_args(args)
     
     #Base URLS
@@ -18,6 +19,7 @@ def main(args):
     cover_art = "http://coverartarchive.org/release/"
     look_artist = results.artist.replace("/","")
     look_album = results.album.replace("/","")
+    output_file = results.out
     #Request for inital album lists with look_album
     req = brainz + "?" + urllib.parse.urlencode({'query':look_album})
     album_pg = requests.get(req)
@@ -55,11 +57,11 @@ def main(args):
     art = json.loads(coverart_req.content)
     f = art["images"][0]["image"]
     print("Downloading {} from {}".format(look_album,f))
-    command = "wget {} -O cover.jpg".format(f)
+    command = "wget {} -O {}".format(f,output_file)
     subprocess.Popen(command.split(" "),stdout=subprocess.PIPE,stderr=subprocess.PIPE).wait()
     #Convert png to jpg
     if f.endswith(".png"):
-        command = "convert cover.jpg cover.jpg"
+        command = "convert {} {}".format(output_file,output_file)
         print("Converting to jpg")
         subprocess.Popen(command.split(" "),stdout=subprocess.PIPE,stderr=subprocess.PIPE).wait()
 
