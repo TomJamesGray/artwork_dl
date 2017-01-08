@@ -11,7 +11,8 @@ def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("artist",type=str,action="store")
     parser.add_argument("album",type=str,action="store")
-    parser.add_argument("--out",type=str,default="cover.jpg",action="store")
+    parser.add_argument("--out",type=str,default="cover.jpg",action="store",
+            help="Specify output file, default cover.jpg")
     results = parser.parse_args(args)
     
     #Base URLS
