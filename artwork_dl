@@ -6,6 +6,7 @@ import subprocess
 import argparse
 import sys
 import urllib.parse
+import shutil
 
 def main(args):
     parser = argparse.ArgumentParser()
@@ -74,8 +75,11 @@ def main(args):
     f = output_qualities[output_quality](art)
 
     print("Downloading {} from {}".format(look_album,f))
-    command = "wget {} -O {}".format(f,output_file)
-    subprocess.Popen(command.split(" "),stdout=subprocess.PIPE,stderr=subprocess.PIPE).wait()
+    #command = "wget {} -O {}".format(f,output_file)
+    #subprocess.Popen(command.split(" "),stdout=subprocess.PIPE,stderr=subprocess.PIPE).wait()
+    img_dl = requests.get(f,stream=True)
+    with open(output_file,'wb') as out_file:
+        shutil.copyfileobj(img_dl.raw, out_file)
     #Convert png to jpg
     if f.endswith(".png"):
         command = "convert {} {}".format(output_file,output_file)
