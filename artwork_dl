@@ -69,6 +69,7 @@ def main(args):
     
     if not coverart_req.status_code == 200:
         print("Bad coverartarchive status code {}".format(coverart_req.status_code))
+        sys.exit(1)
     art = json.loads(coverart_req.content)
     f = output_qualities[output_quality](art)
 
