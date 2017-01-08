@@ -20,8 +20,8 @@ def main(args):
     #Base URLS
     brainz = "http://musicbrainz.org/ws/2/release"
     cover_art = "http://coverartarchive.org/release/"
-    look_artist = results.artist.replace("/","")
-    look_album = results.album.replace("/","")
+    look_artist = results.artist
+    look_album = results.album
     output_file = results.out
     output_quality = results.quality
     output_qualities = {
